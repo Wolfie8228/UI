@@ -2,10 +2,9 @@ import tkinter as tk
 from tkinter import filedialog
 
 selected_files = {}
-all_buttons = []  # Store only current layout buttons
+all_buttons = []
 
 def reset_selected_files(mode):
-    global selected_files
     selected_files.clear()
     if mode == "validation":
         selected_files.update({"file": None, "config": None})
@@ -28,16 +27,11 @@ def browse_directory(key):
 def update_log_ui(message, is_error=False):
     log_text.config(state="normal")
     if is_error:
-        log_text.insert(tk.END, message + "\n", "error")  # Red text for errors
+        log_text.insert(tk.END, message + "\n", "error")
     else:
         log_text.insert(tk.END, message + "\n")
     log_text.yview(tk.END)
     log_text.config(state="disabled")
-
-def disable_all_buttons():
-    for btn in all_buttons:
-        if btn.winfo_exists():  
-            btn.config(state="disabled")
 
 def process_validation():
     if not validate_selections(["file", "config"]):
@@ -64,7 +58,6 @@ def show_validation_layout():
     global all_buttons
     reset_selected_files("validation")
     disable_consolidation()
-    root.geometry("500x450")
     clear_dynamic_widgets()
     all_buttons = []
 
@@ -78,7 +71,7 @@ def show_validation_layout():
 
     frame = tk.Frame(root)
     frame.pack(pady=20)
-    
+
     clear_button = tk.Button(frame, text="Clear", command=clear_labels, width=10)
     clear_button.grid(row=0, column=0, padx=10)
 
@@ -90,12 +83,12 @@ def show_validation_layout():
 
     all_buttons.extend([btn1, btn2, submit_button, clear_button, cancel_button])
     show_log_area()
+    root.update_idletasks()  # Auto-adjust window size
 
 def show_consolidation_layout():
     global all_buttons
     reset_selected_files("consolidation")
     disable_validation()
-    root.geometry("500x450")
     clear_dynamic_widgets()
     all_buttons = []
 
@@ -124,18 +117,20 @@ def show_consolidation_layout():
 
     all_buttons.extend([btn1, btn2, btn3, submit_button, clear_button, cancel_button])
     show_log_area()
+    root.update_idletasks()  # Auto-adjust window size
 
 def return_to_main():
     reset_selected_files("")
     enable_main_buttons()
     clear_dynamic_widgets()
     show_main_buttons()
+    root.update_idletasks()  # Auto-adjust window size
 
 def show_log_area():
     global log_text
     log_text = tk.Text(root, height=6, width=60, state="disabled", wrap="word", bg="black", fg="white")
     log_text.pack(pady=10)
-    log_text.tag_config("error", foreground="red")  # Red text for errors
+    log_text.tag_config("error", foreground="red")
 
 def clear_dynamic_widgets():
     for widget in root.winfo_children():
@@ -152,6 +147,7 @@ def clear_labels():
 
 def show_main_buttons():
     button_frame.pack(pady=10)
+    root.update_idletasks()  # Auto-adjust window size
 
 def disable_validation():
     validation_button.config(state="disabled")
@@ -168,7 +164,6 @@ def enable_main_buttons():
 # Main window
 root = tk.Tk()
 root.title("Data Processing Tool")
-root.geometry("500x400")
 root.configure(bg="#F4F4F4")
 
 title_label = tk.Label(root, text="Data Processing Tool", font=("Arial", 18, "bold"), bg="#F4F4F4")
@@ -187,4 +182,5 @@ validation_button.pack(side="left", padx=10)
 consolidation_button = tk.Button(button_frame, text="Consolidation", command=show_consolidation_layout, width=15)
 consolidation_button.pack(side="left", padx=10)
 
+root.update_idletasks()  # Let Tkinter auto-adjust the window
 root.mainloop()
