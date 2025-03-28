@@ -17,24 +17,26 @@ def browse_file(file_type, key):
     file_path = filedialog.askopenfilename(filetypes=file_types)
     if file_path:
         selected_files[key] = file_path
-        update_log_ui(f"Selected {key.capitalize()}.")
+        update_log_ui(f"{key.capitalize()} Selected: {file_path}")
 
 def browse_directory(key):
     folder_path = filedialog.askdirectory()
     if folder_path:
         selected_files[key] = folder_path
-        update_log_ui(f"Selected {key.capitalize()}.")
+        update_log_ui(f"{key.capitalize()} Selected: {folder_path}")
 
-def update_log_ui(message):
+def update_log_ui(message, is_error=False):
     log_text.config(state="normal")
-    log_text.insert(tk.END, message + "\n")
+    if is_error:
+        log_text.insert(tk.END, message + "\n", "error")  # Red text for errors
+    else:
+        log_text.insert(tk.END, message + "\n")
     log_text.yview(tk.END)
     log_text.config(state="disabled")
 
 def disable_all_buttons():
-    """Disables all interactive buttons currently in the layout."""
     for btn in all_buttons:
-        if btn.winfo_exists():  # Check if button still exists before disabling
+        if btn.winfo_exists():  
             btn.config(state="disabled")
 
 def process_validation():
@@ -54,7 +56,7 @@ def process_consolidation():
 def validate_selections(required_keys):
     missing = [key.capitalize() for key in required_keys if not selected_files.get(key)]
     if missing:
-        update_log_ui(f"Error: Missing selections - {', '.join(missing)}")
+        update_log_ui(f"Error: Missing selections - {', '.join(missing)}", is_error=True)
         return False
     return True
 
@@ -62,59 +64,65 @@ def show_validation_layout():
     global all_buttons
     reset_selected_files("validation")
     disable_consolidation()
-    root.geometry("450x400")
+    root.geometry("500x450")
     clear_dynamic_widgets()
-    all_buttons = []  # Reset button list
+    all_buttons = []
 
     tk.Label(root, text="Validation Layout", font=("Arial", 14)).pack(pady=10)
 
-    btn1 = tk.Button(root, text="Browse File", command=lambda: browse_file("excel", "file"))
-    btn1.pack()
+    btn1 = tk.Button(root, text="Browse File", command=lambda: browse_file("excel", "file"), width=20)
+    btn1.pack(pady=5)
 
-    btn2 = tk.Button(root, text="Browse Config", command=lambda: browse_file("config", "config"))
-    btn2.pack()
+    btn2 = tk.Button(root, text="Browse Config", command=lambda: browse_file("config", "config"), width=20)
+    btn2.pack(pady=5)
 
     frame = tk.Frame(root)
     frame.pack(pady=20)
-    clear_button = tk.Button(frame, text="Clear", command=clear_labels)
+    
+    clear_button = tk.Button(frame, text="Clear", command=clear_labels, width=10)
     clear_button.grid(row=0, column=0, padx=10)
-    cancel_button = tk.Button(frame, text="Cancel", command=return_to_main)
+
+    cancel_button = tk.Button(frame, text="Cancel", command=return_to_main, width=10)
     cancel_button.grid(row=0, column=1, padx=10)
-    submit_button = tk.Button(frame, text="Submit", command=process_validation)
+
+    submit_button = tk.Button(frame, text="Submit", command=process_validation, width=10)
     submit_button.grid(row=0, column=2, padx=10)
 
-    all_buttons.extend([btn1, btn2, submit_button, clear_button, cancel_button])  # Store new buttons
+    all_buttons.extend([btn1, btn2, submit_button, clear_button, cancel_button])
     show_log_area()
 
 def show_consolidation_layout():
     global all_buttons
     reset_selected_files("consolidation")
     disable_validation()
-    root.geometry("450x400")
+    root.geometry("500x450")
     clear_dynamic_widgets()
-    all_buttons = []  # Reset button list
+    all_buttons = []
 
     tk.Label(root, text="Consolidation Layout", font=("Arial", 14)).pack(pady=10)
 
-    btn1 = tk.Button(root, text="Browse Directory", command=lambda: browse_directory("directory"))
-    btn1.pack()
+    btn1 = tk.Button(root, text="Browse Directory", command=lambda: browse_directory("directory"), width=20)
+    btn1.pack(pady=5)
 
-    btn2 = tk.Button(root, text="Select Destination", command=lambda: browse_directory("destination"))
-    btn2.pack()
+    btn2 = tk.Button(root, text="Select Destination", command=lambda: browse_directory("destination"), width=20)
+    btn2.pack(pady=5)
 
-    btn3 = tk.Button(root, text="Browse Config", command=lambda: browse_file("excel", "config"))
-    btn3.pack()
+    btn3 = tk.Button(root, text="Browse Config", command=lambda: browse_file("excel", "config"), width=20)
+    btn3.pack(pady=5)
 
     frame = tk.Frame(root)
     frame.pack(pady=20)
-    clear_button = tk.Button(frame, text="Clear", command=clear_labels)
+
+    clear_button = tk.Button(frame, text="Clear", command=clear_labels, width=10)
     clear_button.grid(row=0, column=0, padx=10)
-    cancel_button = tk.Button(frame, text="Cancel", command=return_to_main)
+
+    cancel_button = tk.Button(frame, text="Cancel", command=return_to_main, width=10)
     cancel_button.grid(row=0, column=1, padx=10)
-    submit_button = tk.Button(frame, text="Submit", command=process_consolidation)
+
+    submit_button = tk.Button(frame, text="Submit", command=process_consolidation, width=10)
     submit_button.grid(row=0, column=2, padx=10)
 
-    all_buttons.extend([btn1, btn2, btn3, submit_button, clear_button, cancel_button])  # Store new buttons
+    all_buttons.extend([btn1, btn2, btn3, submit_button, clear_button, cancel_button])
     show_log_area()
 
 def return_to_main():
@@ -125,17 +133,16 @@ def return_to_main():
 
 def show_log_area():
     global log_text
-    log_text = tk.Text(root, height=6, width=50, state="disabled", wrap="word")
+    log_text = tk.Text(root, height=6, width=60, state="disabled", wrap="word", bg="black", fg="white")
     log_text.pack(pady=10)
+    log_text.tag_config("error", foreground="red")  # Red text for errors
 
 def clear_dynamic_widgets():
-    """Clears all UI elements except main buttons."""
     for widget in root.winfo_children():
         if widget not in (button_frame, title_label, description_label):
             widget.destroy()
 
 def clear_labels():
-    """Clears log and file selections."""
     log_text.config(state="normal")
     log_text.delete(1.0, tk.END)
     log_text.insert(tk.END, "Cleared file selections.\n")
@@ -161,14 +168,17 @@ def enable_main_buttons():
 # Main window
 root = tk.Tk()
 root.title("Data Processing Tool")
+root.geometry("500x400")
+root.configure(bg="#F4F4F4")
 
-title_label = tk.Label(root, text="Data Processing Tool", font=("Arial", 18, "bold"))
+title_label = tk.Label(root, text="Data Processing Tool", font=("Arial", 18, "bold"), bg="#F4F4F4")
 title_label.pack(pady=5)
 
-description_label = tk.Label(root, text="This tool allows you to validate and consolidate data effortlessly.", font=("Arial", 12), wraplength=400, justify="center")
+description_label = tk.Label(root, text="This tool allows you to validate and consolidate data effortlessly.",
+                             font=("Arial", 12), wraplength=400, justify="center", bg="#F4F4F4")
 description_label.pack(pady=5)
 
-button_frame = tk.Frame(root)
+button_frame = tk.Frame(root, bg="#F4F4F4")
 button_frame.pack(pady=10)
 
 validation_button = tk.Button(button_frame, text="Validation", command=show_validation_layout, width=15)
